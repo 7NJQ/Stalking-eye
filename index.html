@@ -7,90 +7,61 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&display=swap');
-        body { font-family: 'IBM Plex Sans Arabic', sans-serif; background-color: #0b0f1a; color: white; touch-action: manipulation; }
-        .btn-active { active:scale-95; transition: transform 0.1s; cursor: pointer; }
+        body { background-color: #0b0f1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; margin: 0; }
+        .card { background: #161b2b; padding: 40px; border-radius: 20px; border: 1px solid #1f2937; text-align: center; width: 100%; max-width: 380px; }
+        button { background: white; color: black; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.95); }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body>
 
-    <div id="test-header" class="w-full max-w-xl mb-6 hidden items-center justify-between p-4 bg-[#161b2b] rounded-xl border border-gray-800">
-        <div class="flex items-center gap-3">
-            <img id="test-avatar" src="" class="w-12 h-12 rounded-full border-2 border-emerald-500">
-            <div>
-                <p id="test-user-name" class="text-sm font-bold"></p>
-                <p class="text-[10px] text-emerald-400 font-mono">ONLINE</p>
-            </div>
-        </div>
-        <button onclick="executeLogout()" class="text-[10px] bg-red-900/10 text-red-500 px-3 py-1.5 rounded border border-red-900/30 btn-active">LOGOUT</button>
+    <div id="login-section" class="card">
+        <h1 style="letter-spacing: 1px; margin-bottom: 20px;">STALKING EYE</h1>
+        <button onclick="login()">LOGIN WITH GITHUB</button>
     </div>
 
-    <div id="test-login-gate" class="text-center w-full max-w-md p-10 bg-[#161b2b] rounded-3xl border border-gray-800 shadow-2xl">
-        <h1 class="text-2xl font-black mb-8 tracking-widest text-white">STALKING EYE</h1>
-        <button id="loginBtn" onclick="executeLogin()" class="w-full flex items-center justify-center gap-4 bg-white text-black font-black py-5 rounded-2xl hover:bg-gray-200 btn-active border-none shadow-xl">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            LOGIN WITH GITHUB
-        </button>
-    </div>
-
-    <div id="test-dashboard" class="w-full max-w-xl hidden">
-        <div class="bg-[#161b2b] p-8 rounded-3xl border border-gray-800 shadow-2xl">
-            <h2 class="text-xs font-mono text-emerald-500 mb-6 tracking-widest uppercase">Target Module</h2>
-            <div class="space-y-5">
-                <input id="target-input" type="text" placeholder="Username..." class="w-full bg-[#0b0f1a] border border-gray-800 rounded-xl p-4 text-sm focus:outline-none focus:border-emerald-500 text-white">
-                <button onclick="submitTarget()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-black text-sm btn-active border-none">ADD TARGET</button>
-            </div>
-            <div id="log-output" class="mt-8 p-4 bg-black/40 rounded-lg border border-gray-900 font-mono text-[9px] text-gray-500 overflow-y-auto max-h-40 leading-relaxed text-left">
-                > System initialized...
-            </div>
-        </div>
+    <div id="main-section" class="card hidden">
+        <h2 style="color: #10b981; font-size: 14px;">CONNECTED</h2>
+        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 10px; margin: 15px 0; border-radius: 5px; background: #0b0f1a; color: white; border: 1px solid #374151;">
+        <button onclick="saveTarget()" style="background: #059669; color: white;">ADD TARGET</button>
+        <div id="status-logs" style="font-size: 10px; color: #6b7280; margin-top: 15px; text-align: left;">> Ready...</div>
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://xhahxhzqulnjifmwdyhu.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoYWh4aHpxdWxuamlmbXdyeWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4Njk3MjgsImV4cCI6MjA1MzQ0NTcyOH0.YyE2S4pD8O0F9S7-Q6W7H6y2P9O3J5K4L8Z2X1M4N5O';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const S_URL = 'https://xhahxhzqulnjifmwdyhu.supabase.co';
+        const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoYWh4aHpxdWxuamlmbXdyeWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4Njk3MjgsImV4cCI6MjA1MzQ0NTcyOH0.YyE2S4pD8O0F9S7-Q6W7H6y2P9O3J5K4L8Z2X1M4N5O';
+        const supabase = window.supabase.createClient(S_URL, S_KEY);
 
-        async function executeLogin() {
-            const { error } = await supabase.auth.signInWithOAuth({
+        async function login() {
+            await supabase.auth.signInWithOAuth({
                 provider: 'github',
                 options: { redirectTo: 'https://7njq.github.io/Stalking-eye/' }
             });
-            if (error) alert(error.message);
         }
 
-        async function executeLogout() {
-            await supabase.auth.signOut();
-            window.location.reload();
-        }
-
-        async function sessionSync() {
+        async function checkSession() {
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
-                const user = session.user;
-                document.getElementById('test-login-gate').classList.add('hidden');
-                document.getElementById('test-header').classList.remove('hidden');
-                document.getElementById('test-header').classList.add('flex');
-                document.getElementById('test-dashboard').classList.remove('hidden');
-                document.getElementById('test-user-name').innerText = user.user_metadata.full_name || user.email;
-                document.getElementById('test-avatar').src = user.user_metadata.avatar_url;
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('main-section').classList.remove('hidden');
             }
         }
 
-        async function submitTarget() {
-            const input = document.getElementById('target-input');
-            const target = input.value.trim();
-            if (!target) return;
+        async function saveTarget() {
+            const name = document.getElementById('target-name').value;
+            if (!name) return;
             const { data: { session } } = await supabase.auth.getSession();
-            const { error } = await supabase.from('targets').insert([{ target_name: target, github_user_id: session.user.id, usernames: [target] }]);
-            if (error) {
-                document.getElementById('log-output').innerHTML += `<br>> Error: ${error.message}`;
-            } else {
-                document.getElementById('log-output').innerHTML += `<br>> Success: ${target} added.`;
-                input.value = "";
-            }
+            const { error } = await supabase.from('targets').insert([{ 
+                target_name: name, 
+                github_user_id: session.user.id, 
+                usernames: [name] 
+            }]);
+            document.getElementById('status-logs').innerText = error ? 'Error!' : 'Target added: ' + name;
+            document.getElementById('target-name').value = '';
         }
-        sessionSync();
+
+        checkSession();
     </script>
 </body>
 </html>
