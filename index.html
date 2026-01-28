@@ -9,7 +9,7 @@
     <style>
         body { background-color: #0b0f1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; margin: 0; }
         .card { background: #161b2b; padding: 40px; border-radius: 20px; border: 1px solid #1f2937; text-align: center; width: 100%; max-width: 380px; }
-        .auth-btn { display: block; background: white; color: black; padding: 15px; border-radius: 10px; font-weight: bold; text-decoration: none; cursor: pointer; border: none; width: 100%; }
+        .auth-btn { display: block; background: white; color: black; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; width: 100%; }
         .hidden { display: none; }
     </style>
 </head>
@@ -22,7 +22,7 @@
 
     <div id="main-section" class="card hidden">
         <h2 style="color: #10b981;">CONNECTED</h2>
-        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 10px; margin: 15px 0; background: #0b0f1a; color: white; border: 1px solid #374151;">
+        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 10px; margin: 15px 0; background: #0b0f1a; color: white; border: 1px solid #374151; border-radius: 5px;">
         <button onclick="saveTarget()" style="background: #059669; color: white; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">ADD TARGET</button>
         <div id="status-logs" style="font-size: 10px; color: #6b7280; margin-top: 20px;">> Ready...</div>
     </div>
@@ -33,11 +33,9 @@
         const supabase = window.supabase.createClient(S_URL, S_KEY);
 
         async function login() {
-            // هنا السر: لازم نحدد الـ Provider ونترك الباقي لـ Supabase
-            const { data, error } = await supabase.auth.signInWithOAuth({
+            await supabase.auth.signInWithOAuth({
                 provider: 'github'
             });
-            if (error) alert("Error: " + error.message);
         }
 
         async function checkSession() {
