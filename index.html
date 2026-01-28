@@ -9,23 +9,25 @@
     <style>
         body { background-color: #0b0f1a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; margin: 0; }
         .card { background: #161b2b; padding: 40px; border-radius: 20px; border: 1px solid #1f2937; text-align: center; width: 100%; max-width: 380px; }
-        button { background: white; color: black; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.2s; }
-        button:active { transform: scale(0.95); }
+        .auth-link { display: block; background: white; color: black; padding: 15px; border-radius: 10px; font-weight: bold; text-decoration: none; transition: 0.2s; }
+        .auth-link:active { transform: scale(0.95); background: #e5e7eb; }
         .hidden { display: none; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px; background: #0b0f1a; color: white; border: 1px solid #374151; outline: none; }
+        .action-btn { background: #059669; color: white; width: 100%; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="login-section" class="card">
-        <h1 style="letter-spacing: 1px; margin-bottom: 20px;">STALKING EYE</h1>
-        <button onclick="login()">LOGIN WITH GITHUB</button>
+        <h1 style="margin-bottom: 25px; letter-spacing: 1px;">STALKING EYE</h1>
+        <a href="#" onclick="login(event)" class="auth-link">LOGIN WITH GITHUB</a>
     </div>
 
     <div id="main-section" class="card hidden">
-        <h2 style="color: #10b981; font-size: 14px;">CONNECTED</h2>
-        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 10px; margin: 15px 0; border-radius: 5px; background: #0b0f1a; color: white; border: 1px solid #374151;">
-        <button onclick="saveTarget()" style="background: #059669; color: white;">ADD TARGET</button>
-        <div id="status-logs" style="font-size: 10px; color: #6b7280; margin-top: 15px; text-align: left;">> Ready...</div>
+        <h2 style="color: #10b981; font-size: 14px; margin-bottom: 10px;">CONNECTED</h2>
+        <input id="target-name" type="text" placeholder="Username...">
+        <button onclick="saveTarget()" class="action-btn">ADD TARGET</button>
+        <div id="status-logs" style="font-size: 10px; color: #6b7280; margin-top: 20px; text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px;">> System Ready...</div>
     </div>
 
     <script>
@@ -33,7 +35,8 @@
         const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoYWh4aHpxdWxuamlmbXdyeWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4Njk3MjgsImV4cCI6MjA1MzQ0NTcyOH0.YyE2S4pD8O0F9S7-Q6W7H6y2P9O3J5K4L8Z2X1M4N5O';
         const supabase = window.supabase.createClient(S_URL, S_KEY);
 
-        async function login() {
+        async function login(e) {
+            e.preventDefault();
             await supabase.auth.signInWithOAuth({
                 provider: 'github',
                 options: { redirectTo: 'https://7njq.github.io/Stalking-eye/' }
@@ -57,7 +60,8 @@
                 github_user_id: session.user.id, 
                 usernames: [name] 
             }]);
-            document.getElementById('status-logs').innerText = error ? 'Error!' : 'Target added: ' + name;
+            const logBox = document.getElementById('status-logs');
+            logBox.innerHTML += `<br>> ${error ? 'Error saving!' : 'Locked on: ' + name}`;
             document.getElementById('target-name').value = '';
         }
 
