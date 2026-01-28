@@ -20,7 +20,7 @@
     </div>
     <div id="main-section" class="card hidden">
         <h2 style="color: #10b981;">CONNECTED</h2>
-        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 10px; margin: 15px 0; background: #0b0f1a; color: white; border: 1px solid #374151; border-radius: 5px;">
+        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 12px; margin: 15px 0; background: #0b0f1a; color: white; border: 1px solid #374151; border-radius: 5px;">
         <button onclick="saveTarget()" style="background: #059669; color: white; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">ADD TARGET</button>
         <div id="status-logs" style="font-size: 10px; color: #6b7280; margin-top: 20px;">> Ready...</div>
     </div>
@@ -31,25 +31,34 @@
             auth: { persistSession: true, autoRefreshToken: true }
         });
         async function login() {
-            await supabase.auth.signInWithOAuth({
+            const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'github',
                 options: { redirectTo: 'https://7njq.github.io/Stalking-eye/' }
             });
+            if (error) alert("خطأ في تسجيل الدخول: " + error.message);
         }
         async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                document.getElementById('login-section').classList.add('hidden');
-                document.getElementById('main-section').classList.remove('hidden');
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                if (session) {
+                    document.getElementById('login-section').classList.add('hidden');
+                    document.getElementById('main-section').classList.remove('hidden');
+                }
+            } catch (err) {
+                alert("خطأ في فحص الجلسة: " + err.message);
             }
         }
         async function saveTarget() {
             const name = document.getElementById('target-name').value;
             if (!name) return;
             const { data: { session } } = await supabase.auth.getSession();
-            await supabase.from('targets').insert([{ target_name: name, github_user_id: session.user.id, usernames: [name] }]);
-            document.getElementById('status-logs').innerText = 'Target added: ' + name;
-            document.getElementById('target-name').value = '';
+            const { error } = await supabase.from('targets').insert([{ target_name: name, github_user_id: session.user.id, usernames: [name] }]);
+            if (error) alert("خطأ في الحفظ: " + error.message);
+            else {
+                document.getElementById('status-logs').innerText = 'Target added: ' + name;
+                document.getElementById('target-name').value = '';
+            }
         }
         checkSession();
     </script>
