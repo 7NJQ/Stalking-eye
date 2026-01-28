@@ -22,7 +22,7 @@
 
     <div id="main-section" class="card hidden">
         <h2 style="color: #10b981;">CONNECTED</h2>
-        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 10px; margin: 15px 0; background: #0b0f1a; color: white; border: 1px solid #374151; border-radius: 5px;">
+        <input id="target-name" type="text" placeholder="Username..." style="width: 100%; padding: 12px; margin: 15px 0; background: #0b0f1a; color: white; border: 1px solid #374151; border-radius: 5px;">
         <button onclick="saveTarget()" style="background: #059669; color: white; width: 100%; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">ADD TARGET</button>
         <div id="status-logs" style="font-size: 10px; color: #6b7280; margin-top: 20px;">> Ready...</div>
     </div>
@@ -30,11 +30,17 @@
     <script>
         const S_URL = 'https://xhahxhzqulnjifmwdyhu.supabase.co';
         const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoYWh4aHpxdWxuamlmbXdyeWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4Njk3MjgsImV4cCI6MjA1MzQ0NTcyOH0.YyE2S4pD8O0F9S7-Q6W7H6y2P9O3J5K4L8Z2X1M4N5O';
-        const supabase = window.supabase.createClient(S_URL, S_KEY);
+        
+        const supabase = window.supabase.createClient(S_URL, S_KEY, {
+            auth: { persistSession: true, autoRefreshToken: true }
+        });
 
         async function login() {
             await supabase.auth.signInWithOAuth({
-                provider: 'github'
+                provider: 'github',
+                options: {
+                    redirectTo: window.location.origin + window.location.pathname
+                }
             });
         }
 
@@ -50,7 +56,11 @@
             const name = document.getElementById('target-name').value;
             if (!name) return;
             const { data: { session } } = await supabase.auth.getSession();
-            await supabase.from('targets').insert([{ target_name: name, github_user_id: session.user.id, usernames: [name] }]);
+            await supabase.from('targets').insert([{ 
+                target_name: name, 
+                github_user_id: session.user.id, 
+                usernames: [name] 
+            }]);
             document.getElementById('status-logs').innerText = 'Target added: ' + name;
             document.getElementById('target-name').value = '';
         }
